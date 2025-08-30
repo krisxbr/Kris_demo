@@ -15,8 +15,8 @@ export const MapScreenshot: React.FC<MapScreenshotProps> = ({ onOpen }) => (
       {onOpen && <button onClick={onOpen} className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500">Open Live Map</button>}
     </div>
     <SafeImage
-      src="https://picsum.photos/seed/map/1200/400"
-      alt="Map screenshot"
+      src="https://w.forfun.com/fetch/e0/e06d391097240f9d92b1b22e1e90b106.jpeg"
+      alt="Illustration of ancient Roman ruins with an aqueduct at sunset, representing lessons on the map."
       className="h-72 w-full object-cover"
     />
     <div className="border-t border-slate-200 p-4 text-xs text-slate-600">Example locations and pins for illustration.</div>

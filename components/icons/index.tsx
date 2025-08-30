@@ -176,3 +176,19 @@ export const RomanHelmetIcon: React.FC<IconProps> = ({ className }) => (
         <path d="M19.24 11a2 2 0 011.76 3v1.5" />
     </svg>
 );
+
+export const CheckIcon: React.FC<IconProps> = ({ className }) => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={classNames("h-5 w-5", className)}>
+        <path d="M20 6L9 17l-5-5" />
+    </svg>
+);
+
+export const CrosshairIcon: React.FC<IconProps> = ({ className }) => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={classNames("h-5 w-5", className)}>
+        <circle cx="12" cy="12" r="10" />
+        <path d="M22 12h-4" />
+        <path d="M6 12H2" />
+        <path d="M12 6V2" />
+        <path d="M12 22v-4" />
+    </svg>
+);
