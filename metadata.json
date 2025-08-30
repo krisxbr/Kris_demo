@@ -1,0 +1,5 @@
+{
+  "name": "Study360 Redesign",
+  "description": "An interactive educational platform for creating and exploring 360° lessons. Built on the Erasmus+ supported Study360.eu concept, this redesign focuses on a modern, component-based architecture using React, TypeScript, and Tailwind CSS.",
+  "requestFramePermissions": []
+}
