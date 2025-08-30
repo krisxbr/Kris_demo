@@ -162,3 +162,17 @@ export const FilterIcon: React.FC<IconProps> = ({ className }) => (
     <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
   </svg>
 );
+
+export const RomanHelmetIcon: React.FC<IconProps> = ({ className }) => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className={classNames("h-5 w-5", className)}>
+        <path d="M5 14.5A7.5 7.5 0 0119.24 11" />
+        <path d="M4.76 11A7.5 7.5 0 0112 7" />
+        <path d="M12 7V2.5" />
+        <path d="M12 7c2.21 0 4-1.5 4-1.5" />
+        <path d="M12 7c-2.21 0-4-1.5-4-1.5" />
+        <path d="M12 14.5v7" />
+        <path d="M6.5 19H17.5" />
+        <path d="M4.76 11a2 2 0 00-1.76 3v1.5" />
+        <path d="M19.24 11a2 2 0 011.76 3v1.5" />
+    </svg>
+);

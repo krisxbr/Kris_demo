@@ -23,7 +23,7 @@ export const MOCK_LESSONS: Lesson[] = [
     id: "l1",
     title: "Ancient Rome: Forum & Temples",
     author: "Interactive Bulgaria Foundation",
-    tags: ["History", "Ancient Rome", "VR Ready"],
+    tags: ["History", "Ancient Rome", "VR Ready", "Architecture", "Italy", "Educational", "360 Tour"],
     language: "EN",
     level: "Intermediate",
     rating: 4.8,

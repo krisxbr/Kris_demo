@@ -26,7 +26,13 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate, onOpenLesson }) 
             </section>
             <Stats />
             <MapScreenshot onOpen={() => onNavigate('Map')} />
-            <ThematicBanner />
+            <ThematicBanner>
+                <button 
+                    onClick={() => onNavigate('Lessons')}
+                    className="rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-rose-900 shadow-md transition-transform group-hover:scale-105 hover:bg-rose-100 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-rose-900">
+                    View Collection
+                </button>
+            </ThematicBanner>
             <section>
                 <div className="mb-3 flex items-center justify-between">
                     <h2 className="text-lg font-semibold text-gray-900">Featured Lessons</h2>
