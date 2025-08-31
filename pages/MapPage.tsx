@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { MOCK_MAP_ASSETS, MOCK_USER_ID, FALLBACK_SVG } from '../constants';
 import { MapAsset, Page } from '../types';
-import { ShareIcon, CloseIcon, SearchIcon, FilterIcon, CheckIcon, RomanHelmetIcon, CrosshairIcon, ExitFullScreenIcon, ZoomOutIcon, CreateIcon } from '../components/icons';
+import { ShareIcon, CloseIcon, SearchIcon, FilterIcon, CheckIcon, RomanHelmetIcon, CrosshairIcon, ExitFullScreenIcon, ZoomOutIcon, CreateIcon, FullScreenIcon } from '../components/icons';
 import { classNames } from '../utils/classNames';
 import { SafeImage } from '../components/shared/SafeImage';
 import { Pill } from '../components/ui/Pill';
@@ -71,17 +71,41 @@ const AssetPreviewCard: React.FC<{
     onToggleSelect: (assetId: string) => void;
 }> = ({ asset, onClose, onNavigate, onToggleFullscreen, isFullscreen, isSelected, onToggleSelect }) => {
     const isRoman = isRomanEmpireAsset(asset);
+    
+    const previewControls = (
+        <div className="flex items-center gap-2">
+            <button
+                onClick={onToggleFullscreen}
+                className="h-9 w-9 rounded-lg flex items-center justify-center text-slate-600 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors"
+                aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+            >
+                {isFullscreen ? <ExitFullScreenIcon className="h-5 w-5" /> : <FullScreenIcon className="h-5 w-5" />}
+            </button>
+            <button
+                onClick={onClose}
+                className="h-9 w-9 rounded-lg flex items-center justify-center text-slate-600 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors"
+                aria-label="Close preview"
+            >
+                <CloseIcon className="h-5 w-5" />
+            </button>
+        </div>
+    );
+
     return (
         <div 
             className={classNames(
-                "relative bg-white overflow-hidden flex flex-col md:flex-row transition-all duration-300 ease-in-out",
+                "relative overflow-hidden flex flex-col md:flex-row transition-all duration-300 ease-in-out",
                 isFullscreen 
-                    ? "w-full h-full rounded-none" 
-                    : "w-[840px] max-w-[90vw] max-h-[90vh] rounded-2xl animate-fade-in shadow-2xl"
+                    ? "w-full h-full rounded-none bg-slate-900"
+                    : "w-[840px] max-w-[90vw] max-h-[90vh] rounded-2xl animate-fade-in shadow-2xl bg-white"
             )} 
             onClick={e => e.stopPropagation()}
         >
-            <div className="relative md:w-2/3 bg-slate-900 flex items-center justify-center flex-shrink-0">
+            {/* Image container */}
+            <div className={classNames(
+                "relative flex-shrink-0 flex items-center justify-center",
+                 isFullscreen ? "w-full h-full" : "md:w-2/3 bg-slate-900"
+            )}>
                 <SafeImage 
                     src={asset.thumb} 
                     alt={asset.title} 
@@ -91,64 +115,72 @@ const AssetPreviewCard: React.FC<{
                     )}
                 />
             </div>
-             <div className="relative flex flex-col p-4 md:w-1/3 flex-grow">
-                <button onClick={onClose} className="absolute top-2 right-2 h-8 w-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center hover:bg-slate-200 z-10">
-                    <CloseIcon className="h-4 w-4" />
-                </button>
-                
-                {/* Header */}
-                <div className="flex-shrink-0">
-                    <h3 className="font-semibold text-slate-900 text-lg mb-1 pr-8 line-clamp-2">{asset.title}</h3>
-                    <p className="text-xs text-slate-600 mb-2">by {asset.author}</p>
-                </div>
-                
-                {/* Scrollable Content */}
-                <div className="flex-grow overflow-y-auto min-h-0 pr-2 my-3">
-                    {isRoman && (
-                        <div className="flex items-center gap-2 rounded-lg bg-amber-100 p-2 text-sm text-amber-900 border border-amber-200 mb-3">
-                            <RomanHelmetIcon className="h-5 w-5 flex-shrink-0" />
-                            <div className="text-xs">
-                                <span className="font-semibold">Thematic Collection:</span> This asset is part of the Roman Empire collection.
-                            </div>
-                        </div>
-                    )}
 
-                    <div className="flex flex-wrap gap-1.5 mb-3">
-                        {asset.tags.map((tag) => <Pill key={tag} onClick={() => onNavigate('Lessons', { tag })}>{tag}</Pill>)}
-                    </div>
-                    <p className="text-sm text-slate-700 mb-3">{asset.description}</p>
+            {/* Overlay Controls in fullscreen */}
+            {isFullscreen && (
+                <div className="absolute top-4 right-4 z-20">
+                    {previewControls}
                 </div>
-                
-                {/* Footer */}
-                <div className="space-y-3 pt-3 flex-shrink-0 border-t border-slate-200">
-                    <p className="text-xs text-slate-500 font-medium p-2 rounded-md bg-slate-100">
-                        {asset.visibility === 'Private'
-                            ? "This is a private asset. Only you can use it in lessons."
-                            : "This is a public asset, free for educational use."}
-                    </p>
-                    <div className="grid grid-cols-2 gap-2">
-                        <button className="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200">
-                            <ShareIcon className="h-4 w-4" /> Share
-                        </button>
-                        <button onClick={onToggleFullscreen} className="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200">
-                            {isFullscreen ? <ExitFullScreenIcon className="h-4 w-4" /> : <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-4 w-4"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3" /></svg>}
-                            {isFullscreen ? 'Exit' : 'Fullscreen'}
-                        </button>
+            )}
+            
+             {/* Details Panel - Conditionally Rendered */}
+             {!isFullscreen && (
+                <div className="relative flex flex-col p-4 md:w-1/3 flex-grow">
+                    {/* Header */}
+                    <div className="flex justify-between items-start gap-4 flex-shrink-0">
+                        <div className="flex-grow">
+                             <h3 className="font-semibold text-slate-900 text-lg mb-1 break-words">{asset.title}</h3>
+                             <p className="text-xs text-slate-600">by {asset.author}</p>
+                        </div>
+                        <div className="flex-shrink-0">
+                            {previewControls}
+                        </div>
                     </div>
-                    <button
-                        onClick={() => onToggleSelect(asset.id)}
-                        className={classNames(
-                            "w-full inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold shadow-sm transition-colors",
-                            isSelected
-                                ? "bg-blue-600 text-white hover:bg-blue-700"
-                                : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                    
+                    {/* Scrollable Content */}
+                    <div className="flex-grow overflow-y-auto min-h-0 my-3">
+                        {isRoman && (
+                            <div className="flex items-center gap-2 rounded-lg bg-amber-100 p-2 text-sm text-amber-900 border border-amber-200 mb-3">
+                                <RomanHelmetIcon className="h-5 w-5 flex-shrink-0" />
+                                <div className="text-xs">
+                                    <span className="font-semibold">Thematic Collection:</span> This asset is part of the Roman Empire collection.
+                                </div>
+                            </div>
                         )}
-                    >
-                        {isSelected ? <CheckIcon className="h-4 w-4" /> : <span className="text-lg font-bold leading-none">+</span>}
-                        {isSelected ? 'Selected' : 'Select Asset'}
-                    </button>
+
+                        <div className="flex flex-wrap gap-1.5 mb-3">
+                            {asset.tags.map((tag) => <Pill key={tag} onClick={() => onNavigate('Lessons', { tag })}>{tag}</Pill>)}
+                        </div>
+                        <p className="text-sm text-slate-700 mb-3">{asset.description}</p>
+                    </div>
+                    
+                    {/* Footer */}
+                    <div className="space-y-3 pt-3 flex-shrink-0 border-t border-slate-200">
+                        <p className="text-xs text-slate-500 font-medium p-2 rounded-md bg-slate-100">
+                            {asset.visibility === 'Private'
+                                ? "This is a private asset. Only you can use it in lessons."
+                                : "This is a public asset, free for educational use."}
+                        </p>
+                        <div className="grid grid-cols-1 gap-2">
+                            <button className="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200">
+                                <ShareIcon className="h-4 w-4" /> Share
+                            </button>
+                        </div>
+                        <button
+                            onClick={() => onToggleSelect(asset.id)}
+                            className={classNames(
+                                "w-full inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold shadow-sm transition-colors",
+                                isSelected
+                                    ? "bg-blue-600 text-white hover:bg-blue-700"
+                                    : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                            )}
+                        >
+                            {isSelected ? <CheckIcon className="h-4 w-4" /> : <span className="text-lg font-bold leading-none">+</span>}
+                            {isSelected ? 'Selected' : 'Select Asset'}
+                        </button>
+                    </div>
                 </div>
-            </div>
+             )}
         </div>
     );
 };
@@ -545,11 +577,7 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
                 if (isStacked) {
                     setStackedModalAssets(assets);
                 } else {
-                    setSelectedAssetIds(prev =>
-                        prev.includes(asset.id)
-                            ? prev.filter(id => id !== asset.id)
-                            : [...prev, asset.id]
-                    );
+                    setModalAsset(asset);
                 }
             });
             

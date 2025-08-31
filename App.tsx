@@ -62,13 +62,19 @@ export default function App() {
   };
 
   const isMapPage = page === 'Map' && !selectedLesson;
+  const isPlayerPage = !!selectedLesson;
+  const useFullScreenLayout = isMapPage || isPlayerPage;
 
-  if (isMapPage) {
+  if (useFullScreenLayout) {
     return (
       <div className="h-screen w-screen bg-slate-50 text-slate-800 flex flex-col p-4 md:p-6 gap-6">
-        <Header activePage={page} onNavigate={handleNavigate} />
+        <Header activePage={isPlayerPage ? "Lessons" : page} onNavigate={handleNavigate} />
         <main className="flex-grow min-h-0">
-          <MapPage onNavigate={handleNavigate} />
+          {isPlayerPage ? (
+            <Player lesson={selectedLesson!} onBack={handleBackFromPlayer} />
+          ) : (
+            <MapPage onNavigate={handleNavigate} />
+          )}
         </main>
       </div>
     )
@@ -79,11 +85,7 @@ export default function App() {
       <div className='mx-auto max-w-6xl p-4 md:p-6'>
         <Header activePage={page} onNavigate={handleNavigate} />
         <main className="mt-6 space-y-6">
-          {selectedLesson ? (
-            <Player lesson={selectedLesson} onBack={handleBackFromPlayer} />
-          ) : (
-            renderPage()
-          )}
+          {renderPage()}
         </main>
         <Footer />
       </div>

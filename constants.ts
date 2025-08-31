@@ -84,11 +84,11 @@ export const MOCK_MAP_ASSETS: MapAsset[] = [
   },
   {
     id: "ma2",
-    title: "Roman Forum Ruins",
+    title: "Explore the heart of ancient Rome.",
     author: "Interactive Bulgaria Foundation",
     authorId: "user_01",
     tags: ["History", "Ancient Rome", "VR Ready", "Italy", "Ruins", "Forum"],
-    description: "Explore the heart of ancient Rome. This 360° image captures the remaining columns and structures of the Forum.",
+    description: "This 360° image captures the remaining columns and structures of the Forum, the center of day-to-day life in ancient Rome.",
     thumb: "https://images.unsplash.com/photo-1544989164-31dc3c645987?q=80&w=800&auto=format&fit=crop",
     visibility: "Public",
   },
