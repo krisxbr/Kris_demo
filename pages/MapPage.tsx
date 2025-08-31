@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { MOCK_MAP_ASSETS, MOCK_USER_ID, FALLBACK_SVG } from '../constants';
 import { MapAsset, Page } from '../types';
-import { ShareIcon, FullScreenIcon, CloseIcon, SearchIcon, FilterIcon, CheckIcon, RomanHelmetIcon, CrosshairIcon, ExitFullScreenIcon, ZoomOutIcon } from '../components/icons';
+import { ShareIcon, CloseIcon, SearchIcon, FilterIcon, CheckIcon, RomanHelmetIcon, CrosshairIcon, ExitFullScreenIcon, ZoomOutIcon, CreateIcon } from '../components/icons';
 import { classNames } from '../utils/classNames';
 import { SafeImage } from '../components/shared/SafeImage';
 import { Pill } from '../components/ui/Pill';
@@ -64,10 +64,12 @@ const isRomanEmpireAsset = (asset: MapAsset) =>
 const AssetPreviewCard: React.FC<{
     asset: MapAsset;
     onClose: () => void;
-    onNavigate: (page: Page) => void;
+    onNavigate: (page: Page, params?: { tag: string }) => void;
     onToggleFullscreen: () => void;
     isFullscreen: boolean;
-}> = ({ asset, onClose, onNavigate, onToggleFullscreen, isFullscreen }) => {
+    isSelected: boolean;
+    onToggleSelect: (assetId: string) => void;
+}> = ({ asset, onClose, onNavigate, onToggleFullscreen, isFullscreen, isSelected, onToggleSelect }) => {
     const isRoman = isRomanEmpireAsset(asset);
     return (
         <div 
@@ -112,7 +114,7 @@ const AssetPreviewCard: React.FC<{
                     )}
 
                     <div className="flex flex-wrap gap-1.5 mb-3">
-                        {asset.tags.map((tag) => <Pill key={tag}>{tag}</Pill>)}
+                        {asset.tags.map((tag) => <Pill key={tag} onClick={() => onNavigate('Lessons', { tag })}>{tag}</Pill>)}
                     </div>
                     <p className="text-sm text-slate-700 mb-3">{asset.description}</p>
                 </div>
@@ -129,15 +131,21 @@ const AssetPreviewCard: React.FC<{
                             <ShareIcon className="h-4 w-4" /> Share
                         </button>
                         <button onClick={onToggleFullscreen} className="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200">
-                            {isFullscreen ? <ExitFullScreenIcon className="h-4 w-4" /> : <FullScreenIcon className="h-4 w-4" />}
+                            {isFullscreen ? <ExitFullScreenIcon className="h-4 w-4" /> : <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-4 w-4"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3" /></svg>}
                             {isFullscreen ? 'Exit' : 'Fullscreen'}
                         </button>
                     </div>
                     <button
-                        onClick={() => onNavigate('Create')}
-                        className="w-full rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500"
+                        onClick={() => onToggleSelect(asset.id)}
+                        className={classNames(
+                            "w-full inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold shadow-sm transition-colors",
+                            isSelected
+                                ? "bg-blue-600 text-white hover:bg-blue-700"
+                                : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                        )}
                     >
-                        Use in a Lesson
+                        {isSelected ? <CheckIcon className="h-4 w-4" /> : <span className="text-lg font-bold leading-none">+</span>}
+                        {isSelected ? 'Selected' : 'Select Asset'}
                     </button>
                 </div>
             </div>
@@ -156,63 +164,131 @@ interface SelectionTrayProps {
 
 const SelectionTray: React.FC<SelectionTrayProps> = ({ selectedAssets, onDeselect, onClear, onPreview, onUse, onLocate }) => {
     return (
-        <div className="flex-shrink-0 bg-white shadow-[0_-1px_4px_rgba(0,0,0,0.05)] border-t border-slate-200 animate-slide-in-up" style={{ animationDuration: '0.3s' }}>
+        <div className="w-96 flex-shrink-0 bg-white shadow-lg border-l border-slate-200 flex flex-col">
             {/* Header */}
-            <div className="flex justify-between items-center p-3 border-b border-slate-200 bg-slate-50/50">
+            <div className="flex justify-between items-center p-3 border-b border-slate-200 bg-slate-50/50 flex-shrink-0">
                 <div>
                     <h3 className="font-semibold text-slate-800">Selected Assets</h3>
                     <p className="text-xs text-slate-500">{selectedAssets.length} item{selectedAssets.length !== 1 ? 's' : ''} in your collection</p>
                 </div>
+                <button onClick={onClear} className="rounded-lg px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-200 bg-slate-100 border border-slate-200">Clear All</button>
+            </div>
+
+            {/* Asset Cards */}
+            <div className="flex-grow overflow-y-auto p-3 space-y-3">
+                {selectedAssets.map(asset => (
+                     <div key={asset.id} className="p-2 rounded-xl border border-gray-200 bg-white shadow-sm flex gap-3 group">
+                        <SafeImage 
+                            src={asset.thumb} 
+                            alt={asset.title} 
+                            className="w-20 h-20 object-cover rounded-lg flex-shrink-0 cursor-pointer" 
+                            onClick={() => onPreview(asset)}
+                        />
+                        <div className="flex-grow flex flex-col justify-between min-w-0">
+                           <div>
+                                <p className="text-sm font-semibold text-gray-800 truncate cursor-pointer hover:underline" onClick={() => onPreview(asset)}>{asset.title}</p>
+                                <p className="text-xs text-gray-500 truncate">by {asset.author}</p>
+                            </div>
+                           <div className="flex items-center gap-2 pt-1">
+                                <button
+                                    onClick={() => onLocate(asset)}
+                                    className="flex items-center justify-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors flex-grow"
+                                >
+                                    <CrosshairIcon className="h-3 w-3" /> Locate
+                                </button>
+                                <button
+                                    onClick={() => onDeselect(asset.id)}
+                                    className="flex items-center justify-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium bg-red-50 text-red-600 hover:bg-red-100 transition-colors flex-grow"
+                                >
+                                    <CloseIcon className="h-3 w-3" /> Deselect
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+            
+            {/* Footer */}
+            <div className="p-3 border-t border-slate-200 flex-shrink-0">
+                 <button 
+                    onClick={onUse} 
+                    className="w-full flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-base font-bold text-white shadow-lg hover:bg-blue-500 transition-transform transform hover:scale-105"
+                >
+                    <CreateIcon className="h-5 w-5" />
+                    Create Lesson ({selectedAssets.length})
+                </button>
+            </div>
+        </div>
+    );
+};
+
+const StackedAssetsTray: React.FC<{
+    assets: MapAsset[];
+    selectedAssetIds: string[];
+    onClose: () => void;
+    onToggleSelect: (assetId: string) => void;
+    onPreview: (asset: MapAsset) => void;
+    onSelectAll: () => void;
+    onDeselectAll: () => void;
+}> = ({ assets, selectedAssetIds, onClose, onToggleSelect, onPreview, onSelectAll, onDeselectAll }) => {
+    return (
+        <div className="bg-white shadow-[0_-1px_4px_rgba(0,0,0,0.05)] border-t border-slate-200 animate-slide-in-up w-full" style={{ animationDuration: '0.3s' }} onClick={e => e.stopPropagation()}>
+            {/* Header */}
+            <div className="flex justify-between items-center p-3 border-b border-slate-200 bg-slate-50/50">
+                <div>
+                    <h3 className="font-semibold text-slate-800">{assets.length} Assets at this Location</h3>
+                    <p className="text-xs text-slate-500">Scroll horizontally to see all assets</p>
+                </div>
                 <div className="flex items-center gap-2">
-                     <button onClick={onClear} className="rounded-lg px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-200 bg-slate-100 border border-slate-200">Clear All</button>
-                     <button onClick={onUse} className="rounded-lg bg-blue-600 px-4 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-blue-500">Use in Lesson</button>
+                    <button onClick={onDeselectAll} className="rounded-lg px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-200 bg-slate-100 border border-slate-200">Deselect All</button>
+                    <button onClick={onSelectAll} className="rounded-lg bg-blue-600 px-4 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-blue-500">Select All</button>
+                    <button onClick={onClose} className="h-8 w-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center">
+                        <CloseIcon className="h-4 w-4 text-gray-600" />
+                    </button>
                 </div>
             </div>
 
-            {/* Image Grid */}
-            <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-3 p-3 max-h-40 overflow-y-auto">
-                {selectedAssets.map(asset => (
-                    <div key={asset.id} className="relative flex-shrink-0 group aspect-[3/2]">
-                        <SafeImage
-                            src={asset.thumb}
-                            alt={asset.title}
-                            className="h-full w-full rounded-lg object-cover cursor-pointer border-2 border-transparent group-hover:border-blue-500"
-                            onClick={() => onPreview(asset)}
-                        />
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onDeselect(asset.id);
-                            }}
-                            className="absolute -top-1.5 -right-1.5 h-6 w-6 rounded-full bg-slate-700 text-white flex items-center justify-center shadow-md hover:bg-slate-900 transition-transform scale-0 group-hover:scale-100"
-                            aria-label={`Deselect ${asset.title}`}
-                        >
-                            <CloseIcon className="h-3.5 w-3.5" />
-                        </button>
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onLocate(asset);
-                            }}
-                            className="absolute bottom-1 right-1 h-7 w-7 rounded-full bg-slate-700/80 text-white flex items-center justify-center shadow-md hover:bg-slate-900 transition-transform scale-0 group-hover:scale-100"
-                            aria-label={`Locate ${asset.title} on map`}
-                        >
-                            <CrosshairIcon className="h-4 w-4" />
-                        </button>
-                    </div>
-                ))}
+            {/* Asset Cards */}
+            <div className="flex gap-4 overflow-x-auto p-4">
+                {assets.map(asset => {
+                    const isSelected = selectedAssetIds.includes(asset.id);
+                    return (
+                        <div key={asset.id} className="w-52 flex-shrink-0 rounded-xl border border-gray-200 bg-white shadow-sm flex flex-col">
+                            <SafeImage 
+                                src={asset.thumb} 
+                                alt={asset.title} 
+                                className="w-full aspect-[4/3] object-cover rounded-t-xl cursor-pointer"
+                                onClick={() => onPreview(asset)}
+                            />
+                            <div className="p-3 flex-grow space-y-1">
+                                <p className="text-sm font-semibold text-gray-800 line-clamp-2">{asset.title}</p>
+                                <p className="text-xs text-gray-500 line-clamp-1">by {asset.author}</p>
+                            </div>
+                            <div className="p-2 border-t border-gray-200">
+                                <button
+                                    onClick={() => onToggleSelect(asset.id)}
+                                    className={classNames(
+                                        "w-full flex items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors",
+                                        isSelected ? "bg-blue-600 text-white" : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                                    )}
+                                >
+                                    {isSelected ? <CheckIcon className="h-3 w-3 stroke-current" /> : '+'}
+                                    {isSelected ? 'Selected' : 'Select Asset'}
+                                </button>
+                            </div>
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );
 };
 
 interface MapPageProps {
-    onNavigate: (page: Page) => void;
-    isFullscreen: boolean;
-    onToggleFullscreen: () => void;
+    onNavigate: (page: Page, params?: { tag: string }) => void;
 }
 
-export const MapPage: React.FC<MapPageProps> = ({ onNavigate, isFullscreen, onToggleFullscreen }) => {
+export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
     const [filter, setFilter] = useState<'Combined' | 'Global' | 'Personal'>('Combined');
     const [selectedAssetIds, setSelectedAssetIds] = useState<string[]>([]);
     const [modalAsset, setModalAsset] = useState<MapAsset | null>(null);
@@ -270,7 +346,7 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate, isFullscreen, onTo
     }, [filter, searchQuery, showRomanEmpire]);
     
     const selectedAssets = useMemo(() => 
-        MOCK_MAP_ASSETS.filter(a => selectedAssetIds.includes(a.id)), 
+        MOCK_MAP_ASSETS.filter(a => selectedAssetIds.includes(a.id)).sort((a, b) => selectedAssetIds.indexOf(a.id) - selectedAssetIds.indexOf(b.id)),
         [selectedAssetIds]
     );
 
@@ -304,18 +380,6 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate, isFullscreen, onTo
         });
     };
 
-    const handleSelectAllStacked = () => {
-        if (!stackedModalAssets) return;
-        const stackedIds = stackedModalAssets.map(a => a.id);
-        setSelectedAssetIds(prev => [...new Set([...prev, ...stackedIds])]);
-    };
-
-    const handleDeselectAllStacked = () => {
-        if (!stackedModalAssets) return;
-        const stackedIds = stackedModalAssets.map(a => a.id);
-        setSelectedAssetIds(prev => prev.filter(id => !stackedIds.includes(id)));
-    };
-
     const handleLocateAsset = (asset: MapAsset) => {
         if (!mapInstanceRef.current) return;
 
@@ -338,6 +402,21 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate, isFullscreen, onTo
             }, 50); // 50px padding
         }
     };
+
+    const handleCloseAssetPreview = () => {
+        setModalAsset(null);
+        setIsPreviewFullscreen(false);
+    };
+    
+    const handleOverlayClick = (e: React.MouseEvent) => {
+        if (e.target !== e.currentTarget) return;
+        if (modalAsset) {
+            handleCloseAssetPreview();
+        } else {
+            setStackedModalAssets(null);
+        }
+    };
+
 
     // Initialize map
     useEffect(() => {
@@ -401,7 +480,7 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate, isFullscreen, onTo
             }
         });
         
-        const markerToAssetMap = new Map();
+        const markerToAssetsMap = new Map<any, MapAsset[]>();
 
         const createMarkerContent = (assets: MapAsset[], count: number = 0, thumbUrl?: string) => {
             const isCluster = count > 0;
@@ -474,7 +553,7 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate, isFullscreen, onTo
                 }
             });
             
-            markerToAssetMap.set(marker, asset);
+            markerToAssetsMap.set(marker, assets);
             return marker;
         });
 
@@ -482,12 +561,19 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate, isFullscreen, onTo
             render: ({ count, position, markers: clusterMarkers }: { count: number; position: any; markers: any[] }) => {
                 if (!clusterMarkers || clusterMarkers.length === 0) return new AdvancedMarkerElement({ position });
                 
-                const firstMarkerAsset = markerToAssetMap.get(clusterMarkers[0]);
-                if (!firstMarkerAsset) return new AdvancedMarkerElement({ position });
+                const totalAssetsInCluster = clusterMarkers.reduce((sum, marker) => {
+                    const assetsForMarker = markerToAssetsMap.get(marker);
+                    return sum + (assetsForMarker ? assetsForMarker.length : 1);
+                }, 0);
 
-                const content = createMarkerContent([firstMarkerAsset], count, firstMarkerAsset.thumb);
+                const firstMarkerAssets = markerToAssetsMap.get(clusterMarkers[0]);
+                if (!firstMarkerAssets) return new AdvancedMarkerElement({ position });
+
+                const firstAssetForThumbnail = firstMarkerAssets[0];
+
+                const content = createMarkerContent([firstAssetForThumbnail], totalAssetsInCluster, firstAssetForThumbnail.thumb);
                 
-                return new AdvancedMarkerElement({ position, content, zIndex: count });
+                return new AdvancedMarkerElement({ position, content, zIndex: totalAssetsInCluster });
             }
         };
 
@@ -495,19 +581,8 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate, isFullscreen, onTo
 
     }, [filteredAssets, assetPinMap, selectedAssetIds, isMapReady]);
 
-    const closeAllModals = () => {
-        setModalAsset(null);
-        setStackedModalAssets(null);
-        setIsPreviewFullscreen(false);
-    };
-
     return (
-        <div className={classNames(
-            "flex flex-col w-full overflow-hidden bg-slate-100",
-            isFullscreen 
-                ? "h-screen rounded-none border-none shadow-none" 
-                : "h-[calc(100vh-140px)] min-h-[600px] rounded-2xl shadow-lg border border-slate-200"
-        )}>
+        <div className="flex flex-row w-full h-full overflow-hidden bg-slate-100 rounded-2xl shadow-lg border border-slate-200">
             <div className="relative flex-grow">
                 <div ref={mapRef} className="h-full w-full" />
                 
@@ -550,13 +625,6 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate, isFullscreen, onTo
                 </div>
 
                 <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
-                    <button 
-                        onClick={onToggleFullscreen}
-                        className="h-12 w-12 rounded-2xl bg-white shadow-lg border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-100 hover:text-slate-800 transition transform hover:scale-110 active:scale-100 active:duration-75"
-                        aria-label={isFullscreen ? 'Exit fullscreen map' : 'Enter fullscreen map'}
-                    >
-                        {isFullscreen ? <ExitFullScreenIcon /> : <FullScreenIcon />}
-                    </button>
                     <button
                         onClick={handleZoomOut}
                         className="h-12 w-12 rounded-2xl bg-white shadow-lg border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-100 hover:text-slate-800 transition transform hover:scale-110 active:scale-95 active:duration-75"
@@ -569,68 +637,40 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate, isFullscreen, onTo
                 {(modalAsset || stackedModalAssets) && (
                     <div 
                         className={classNames(
-                            "absolute inset-0 bg-black/60 z-30 flex items-center justify-center",
-                            isPreviewFullscreen ? "p-0" : "p-4"
-                        )} 
-                        onClick={(e) => { if (e.target === e.currentTarget) closeAllModals() }}
+                            "absolute inset-0 bg-black/60 z-30 flex",
+                            modalAsset ? "items-center justify-center" : "items-end",
+                            isPreviewFullscreen ? "p-0" : ""
+                        )}
+                        onClick={handleOverlayClick}
                     >
-                        {modalAsset && <AssetPreviewCard asset={modalAsset} onClose={closeAllModals} onNavigate={onNavigate} onToggleFullscreen={handleTogglePreviewFullscreen} isFullscreen={isPreviewFullscreen} />}
+                        {modalAsset && <AssetPreviewCard 
+                            asset={modalAsset} 
+                            onClose={handleCloseAssetPreview} 
+                            onNavigate={onNavigate} 
+                            onToggleFullscreen={handleTogglePreviewFullscreen} 
+                            isFullscreen={isPreviewFullscreen}
+                            isSelected={selectedAssetIds.includes(modalAsset.id)}
+                            onToggleSelect={handleToggleSelectionInModal}
+                        />}
                         
-                        {stackedModalAssets && (
-                            <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-xl max-h-[80vh] flex flex-col animate-fade-in" onClick={e => e.stopPropagation()}>
-                                <div className="p-4 border-b border-gray-200">
-                                    <div className="flex items-center justify-between">
-                                        <h3 className="font-semibold text-lg text-gray-800">{stackedModalAssets.length} Assets at this Location</h3>
-                                        <button onClick={() => setStackedModalAssets(null)} className="h-8 w-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center">
-                                            <CloseIcon className="h-4 w-4 text-gray-600" />
-                                        </button>
-                                    </div>
-                                    <div className="mt-3 flex gap-2">
-                                        <button onClick={handleSelectAllStacked} className="flex-1 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-200">Select All</button>
-                                        <button onClick={handleDeselectAllStacked} className="flex-1 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-200">Deselect All</button>
-                                    </div>
-                                </div>
-                                <div className="overflow-y-auto p-2">
-                                    {stackedModalAssets.map(asset => {
-                                        const isSelected = selectedAssetIds.includes(asset.id);
-                                        const isRoman = isRomanEmpireAsset(asset);
-                                        return (
-                                            <div 
-                                                key={asset.id}
-                                                onClick={() => handleToggleSelectionInModal(asset.id)}
-                                                className={classNames(
-                                                    "flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors",
-                                                    isSelected ? "bg-blue-50" : "hover:bg-gray-100"
-                                                )}
-                                            >
-                                                <div className={classNames("flex-shrink-0 h-6 w-6 rounded-md flex items-center justify-center border-2",
-                                                    isSelected ? "bg-blue-500 border-blue-500" : "border-gray-300"
-                                                )}>
-                                                    {isSelected && <CheckIcon className="h-4 w-4 text-white" />}
-                                                </div>
-                                                <SafeImage src={asset.thumb} alt={asset.title} className="w-12 rounded-md object-cover flex-shrink-0 aspect-[3/2]" />
-                                                <div className="flex-grow">
-                                                    <div className="flex items-center gap-1.5">
-                                                        {isRoman && <RomanHelmetIcon className="h-4 w-4 text-amber-700 flex-shrink-0" />}
-                                                        <p className="text-sm font-medium text-gray-800 line-clamp-1">{asset.title}</p>
-                                                    </div>
-                                                    <p className="text-xs text-gray-500 line-clamp-1">by {asset.author}</p>
-                                                </div>
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setModalAsset(asset);
-                                                        setStackedModalAssets(null);
-                                                    }}
-                                                    className="text-xs font-medium text-blue-600 hover:underline flex-shrink-0 px-2"
-                                                >
-                                                    Details
-                                                </button>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
+                        {!modalAsset && stackedModalAssets && (
+                            <StackedAssetsTray
+                                assets={stackedModalAssets}
+                                selectedAssetIds={selectedAssetIds}
+                                onClose={() => setStackedModalAssets(null)}
+                                onToggleSelect={handleToggleSelectionInModal}
+                                onPreview={(asset) => {
+                                    setModalAsset(asset);
+                                }}
+                                onSelectAll={() => {
+                                    const assetIds = stackedModalAssets.map(a => a.id);
+                                    setSelectedAssetIds(prev => [...new Set([...prev, ...assetIds])]);
+                                }}
+                                onDeselectAll={() => {
+                                    const assetIds = new Set(stackedModalAssets.map(a => a.id));
+                                    setSelectedAssetIds(prev => prev.filter(id => !assetIds.has(id)));
+                                }}
+                            />
                         )}
                     </div>
                 )}

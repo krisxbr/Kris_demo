@@ -11,7 +11,7 @@ import { Lesson, Page } from '../types';
 import { BookIcon, CreateIcon, MapIcon } from '../components/icons';
 
 interface HomePageProps {
-    onNavigate: (page: Page) => void;
+    onNavigate: (page: Page, params?: { tag: string }) => void;
     onOpenLesson: (lesson: Lesson) => void;
 }
 
@@ -39,7 +39,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate, onOpenLesson }) 
                     <button onClick={() => onNavigate('Lessons')} className="text-sm font-medium text-blue-600 hover:underline">View all</button>
                 </div>
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                    {MOCK_LESSONS.map((l) => <LessonCard key={l.id} lesson={l} onOpen={onOpenLesson} />)}
+                    {MOCK_LESSONS.map((l) => <LessonCard key={l.id} lesson={l} onOpen={onOpenLesson} onNavigateToTag={(tag) => onNavigate('Lessons', { tag })} />)}
                 </div>
             </section>
             <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">

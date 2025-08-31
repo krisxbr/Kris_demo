@@ -6,14 +6,20 @@ import { Pill } from '../ui/Pill';
 interface LessonCardProps {
     lesson: Lesson;
     onOpen: (lesson: Lesson) => void;
+    onNavigateToTag: (tag: string) => void;
 }
 
-export const LessonCard: React.FC<LessonCardProps> = ({ lesson, onOpen }) => {
+export const LessonCard: React.FC<LessonCardProps> = ({ lesson, onOpen, onNavigateToTag }) => {
   const [isFavorited, setIsFavorited] = useState(false);
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevents the card's onClick from firing
     setIsFavorited(!isFavorited);
+  };
+
+  const handleTagClick = (e: React.MouseEvent, tag: string) => {
+    e.stopPropagation();
+    onNavigateToTag(tag);
   };
 
   const handleCardKeyPress = (e: React.KeyboardEvent) => {
@@ -53,7 +59,7 @@ export const LessonCard: React.FC<LessonCardProps> = ({ lesson, onOpen }) => {
         <div className="text-xs text-gray-600">by {lesson.author}</div>
         <div className="flex flex-wrap gap-1.5">
           {lesson.tags.slice(0, 5).map((tag) => (
-            <Pill key={tag}>{tag}</Pill>
+            <Pill key={tag} onClick={(e) => handleTagClick(e, tag)}>{tag}</Pill>
           ))}
         </div>
       </div>

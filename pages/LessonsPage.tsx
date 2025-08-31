@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { FilterBar } from '../components/lessons/FilterBar';
 import { LessonCard } from '../components/shared/LessonCard';
 import { MOCK_LESSONS } from '../constants';
@@ -8,21 +8,27 @@ import { ThematicBanner } from '../components/home/ThematicBanner';
 
 interface LessonsPageProps {
     onOpenLesson: (lesson: Lesson) => void;
+    initialQuery?: string;
 }
 
-export const LessonsPage: React.FC<LessonsPageProps> = ({ onOpenLesson }) => {
-    const [query, setQuery] = useState("");
-    const [level, setLevel] = useState("");
-    const [language, setLanguage] = useState("");
+export const LessonsPage: React.FC<LessonsPageProps> = ({ onOpenLesson, initialQuery }) => {
+    const [query, setQuery] = useState(initialQuery || "");
     const [showRomanEmpire, setShowRomanEmpire] = useState(false);
+
+    useEffect(() => {
+        setQuery(initialQuery || "");
+        if (initialQuery) {
+            setShowRomanEmpire(false);
+        }
+    }, [initialQuery]);
 
     const handleToggleRomanEmpire = () => {
         const newToggleState = !showRomanEmpire;
         setShowRomanEmpire(newToggleState);
         if (newToggleState) {
             setQuery("");
-            setLevel("");
-            setLanguage("");
+        } else {
+            setQuery(initialQuery || "");
         }
     };
 
@@ -34,11 +40,9 @@ export const LessonsPage: React.FC<LessonsPageProps> = ({ onOpenLesson }) => {
         }
 
         return MOCK_LESSONS.filter((lesson) =>
-            (query ? (lesson.title + " " + lesson.author + " " + lesson.tags.join(" ")).toLowerCase().includes(query.toLowerCase()) : true) &&
-            (level ? lesson.level === level : true) &&
-            (language ? lesson.language === language : true)
+            (query ? (lesson.title + " " + lesson.author + " " + lesson.tags.join(" ")).toLowerCase().includes(query.toLowerCase()) : true)
         );
-    }, [query, level, language, showRomanEmpire]);
+    }, [query, showRomanEmpire]);
 
     return (
         <div
@@ -71,14 +75,12 @@ export const LessonsPage: React.FC<LessonsPageProps> = ({ onOpenLesson }) => {
                 {!showRomanEmpire && (
                     <FilterBar
                         query={query} setQuery={setQuery}
-                        level={level} setLevel={setLevel}
-                        language={language} setLanguage={setLanguage}
                     />
                 )}
 
                 {filteredLessons.length > 0 ? (
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                        {filteredLessons.map((l) => <LessonCard key={l.id} lesson={l} onOpen={onOpenLesson} />)}
+                        {filteredLessons.map((l) => <LessonCard key={l.id} lesson={l} onOpen={onOpenLesson} onNavigateToTag={setQuery} />)}
                     </div>
                 ) : (
                     <div className="rounded-2xl border border-gray-200 bg-white p-12 text-center text-sm text-gray-600">
