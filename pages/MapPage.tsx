@@ -156,23 +156,23 @@ const AssetPreviewCard: React.FC<{
                     
                     {/* Footer */}
                     <div className="space-y-3 pt-3 flex-shrink-0 border-t border-slate-200">
-                        <p className="text-xs text-slate-500 font-medium p-2 rounded-md bg-slate-100">
+                        <p className="text-xs text-slate-500 font-medium p-2 rounded-lg bg-slate-100">
                             {asset.visibility === 'Private'
                                 ? "This is a private asset. Only you can use it in lessons."
                                 : "This is a public asset, free for educational use."}
                         </p>
                         <div className="grid grid-cols-1 gap-2">
-                            <button className="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200">
+                            <button className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200">
                                 <ShareIcon className="h-4 w-4" /> Share
                             </button>
                         </div>
                         <button
                             onClick={() => onToggleSelect(asset.id)}
                             className={classNames(
-                                "w-full inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold shadow-sm transition-colors",
+                                "w-full inline-flex items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-semibold shadow-sm transition-colors",
                                 isSelected
-                                    ? "bg-blue-600 text-white hover:bg-blue-700"
-                                    : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                                    ? "border-blue-700 bg-blue-600 text-white hover:bg-blue-700"
+                                    : "border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-200"
                             )}
                         >
                             {isSelected ? <CheckIcon className="h-4 w-4" /> : <span className="text-lg font-bold leading-none">+</span>}

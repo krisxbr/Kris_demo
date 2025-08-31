@@ -61,4 +61,86 @@ const SceneCard: React.FC<{ scene: typeof MOCK_SCENES[0] }> = ({ scene }) => {
             <div className="p-3">
                 <div className="flex justify-between items-start">
                     <h4 className="text-sm font-semibold text-gray-800 line-clamp-2">{scene.title}</h4>
-                    <button onClick={() => setIsExpanded(!isExpanded)} className
+                    <button onClick={() => setIsExpanded(!isExpanded)} className="p-1 text-gray-500 hover:bg-gray-100 rounded-full">
+                        {isExpanded ? <ChevronUpIcon className="h-4 w-4" /> : <ChevronDownIcon className="h-4 w-4" />}
+                    </button>
+                </div>
+                {isExpanded && (
+                    <p className="text-xs text-gray-600 mt-2">{scene.description}</p>
+                )}
+                 <div className="mt-2">
+                    <div className="flex justify-between text-xs text-gray-500 mb-1">
+                        <span>Progress</span>
+                        <span>{scene.completed}/{scene.total}</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-1.5">
+                        <div className="bg-blue-500 h-1.5 rounded-full" style={{ width: `${progress}%` }}></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export const Player: React.FC<PlayerProps> = ({ lesson, onBack }) => {
+    const [isGalleryOpen, setIsGalleryOpen] = useState(true);
+
+    return (
+        <div className="h-full w-full flex flex-col md:flex-row gap-4 rounded-2xl bg-gray-100 border border-gray-200 shadow-lg p-4">
+            {/* Main content view */}
+            <div className="relative flex-grow rounded-2xl bg-gray-800 overflow-hidden">
+                <img src={lesson.thumb} alt={lesson.title} className="h-full w-full object-cover" />
+                <div className="absolute top-3 left-3 bg-black/50 text-white text-sm px-3 py-1.5 rounded-lg backdrop-blur-sm">
+                    {lesson.title}
+                </div>
+                <button
+                    onClick={onBack}
+                    aria-label="Close lesson player"
+                    className="absolute top-3 right-3 h-9 w-9 flex items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm hover:bg-black/70"
+                >
+                    <CloseIcon className="h-5 w-5" />
+                </button>
+            </div>
+
+            {/* Right sidebar */}
+            <div className="flex-shrink-0 w-full md:w-80 flex flex-col gap-4">
+                <SidebarSection icon={TextIcon} title="Lesson Info">
+                    <h2 className="font-semibold text-gray-900">{lesson.title}</h2>
+                    <p className="text-xs text-gray-600">by {lesson.author}</p>
+                    <div className="flex flex-wrap gap-1.5">
+                        {lesson.tags.map(tag => <Pill key={tag}>{tag}</Pill>)}
+                    </div>
+                </SidebarSection>
+                <SidebarSection icon={ParagraphIcon} title="Description">
+                    <p className="text-sm text-gray-700">Explore the majestic ruins of the Roman Forum, the heart of ancient Rome. This lesson will guide you through key temples and monuments.</p>
+                </SidebarSection>
+                <SidebarSection icon={HelpIcon} title="Lesson Actions">
+                    <button className="w-full text-left flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 text-sm text-gray-700"><BookmarkIcon className="h-4 w-4 text-gray-500" /> Save to My Lessons</button>
+                    <button className="w-full text-left flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 text-sm text-gray-700"><LinkIcon className="h-4 w-4 text-gray-500" /> Copy Link</button>
+                </SidebarSection>
+            </div>
+            
+            {/* Bottom scene gallery */}
+            <div className="absolute bottom-4 left-4 right-4 z-10">
+                <div className="flex justify-end mb-2">
+                    <button 
+                        onClick={() => setIsGalleryOpen(!isGalleryOpen)} 
+                        aria-expanded={isGalleryOpen}
+                        className="flex items-center gap-2 px-3 py-2 rounded-full bg-black/50 text-white text-sm backdrop-blur-sm hover:bg-black/70"
+                    >
+                        <GalleryIcon className="h-4 w-4" />
+                        <span>{isGalleryOpen ? 'Hide Scenes' : 'Show Scenes'}</span>
+                        {isGalleryOpen ? <ChevronDownIcon className="h-4 w-4" /> : <ChevronUpIcon className="h-4 w-4" />}
+                    </button>
+                </div>
+                {isGalleryOpen && (
+                    <div className="flex gap-4 overflow-x-auto pb-2">
+                        {MOCK_SCENES.map(scene => (
+                            <SceneCard key={scene.id} scene={scene} />
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
