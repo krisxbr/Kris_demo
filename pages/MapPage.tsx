@@ -72,10 +72,10 @@ const AssetPreviewCard: React.FC<{
     return (
         <div 
             className={classNames(
-                "relative bg-white shadow-2xl overflow-hidden flex flex-col md:flex-row transition-all duration-300 ease-in-out",
+                "relative bg-white overflow-hidden flex flex-col md:flex-row transition-all duration-300 ease-in-out",
                 isFullscreen 
                     ? "w-full h-full rounded-none" 
-                    : "w-[840px] max-w-[90vw] max-h-[90vh] rounded-2xl animate-fade-in"
+                    : "w-[840px] max-w-[90vw] max-h-[90vh] rounded-2xl animate-fade-in shadow-2xl"
             )} 
             onClick={e => e.stopPropagation()}
         >
