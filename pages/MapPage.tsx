@@ -140,18 +140,24 @@ const SelectionTray: React.FC<SelectionTrayProps> = ({ selectedAssets, onDeselec
                             onClick={() => onPreview(asset)}
                         />
                         <button
-                            onClick={() => onDeselect(asset.id)}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onDeselect(asset.id);
+                            }}
                             className="absolute -top-1.5 -right-1.5 h-6 w-6 rounded-full bg-slate-700 text-white flex items-center justify-center shadow-md hover:bg-slate-900 transition-transform scale-0 group-hover:scale-100"
                             aria-label={`Deselect ${asset.title}`}
                         >
                             <CloseIcon className="h-3.5 w-3.5" />
                         </button>
                         <button
-                            onClick={() => onLocate(asset)}
-                            className="absolute inset-0 bg-black/50 text-white flex items-center justify-center transition-opacity opacity-0 group-hover:opacity-100"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onLocate(asset);
+                            }}
+                            className="absolute bottom-1 right-1 h-7 w-7 rounded-full bg-slate-700/80 text-white flex items-center justify-center shadow-md hover:bg-slate-900 transition-transform scale-0 group-hover:scale-100"
                             aria-label={`Locate ${asset.title} on map`}
                         >
-                            <CrosshairIcon className="h-6 w-6" />
+                            <CrosshairIcon className="h-4 w-4" />
                         </button>
                     </div>
                 ))}
