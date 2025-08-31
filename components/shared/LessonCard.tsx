@@ -37,7 +37,7 @@ export const LessonCard: React.FC<LessonCardProps> = ({ lesson, onOpen }) => {
       className="group flex cursor-pointer flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
     >
       <div className="relative">
-        <img src={lesson.thumb} alt={lesson.title} className="h-44 w-full object-cover" />
+        <img src={lesson.thumb} alt={lesson.title} className="w-full object-cover aspect-[3/2]" />
       </div>
       <div className="flex flex-1 flex-col gap-3 p-4">
         <div className="flex items-start justify-between gap-2">

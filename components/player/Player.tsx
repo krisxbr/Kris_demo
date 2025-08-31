@@ -57,7 +57,7 @@ const SceneCard: React.FC<{ scene: typeof MOCK_SCENES[0] }> = ({ scene }) => {
     return (
         <div className="relative flex-shrink-0 w-64 bg-white/80 backdrop-blur-sm rounded-xl shadow-lg overflow-hidden border border-white/20">
             {scene.isSpecial && <div className="absolute top-2 left-2 text-[10px] bg-yellow-300 text-black font-bold px-1.5 py-0.5 rounded-sm">AUTOFILL SPREADSHEET</div>}
-            <img src={scene.thumb} alt={scene.title} className="h-24 w-full object-cover" />
+            <img src={scene.thumb} alt={scene.title} className="w-full object-cover aspect-[3/2]" />
             <div className="p-3">
                 <div className="flex justify-between items-start">
                     <h4 className="text-sm font-semibold text-gray-800 line-clamp-2">{scene.title}</h4>
