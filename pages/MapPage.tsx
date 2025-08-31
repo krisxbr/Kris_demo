@@ -203,7 +203,7 @@ const SelectionTray: React.FC<SelectionTrayProps> = ({ selectedAssets, onDeselec
                     <h3 className="font-semibold text-slate-800">Selected Assets</h3>
                     <p className="text-xs text-slate-500">{selectedAssets.length} item{selectedAssets.length !== 1 ? 's' : ''} in your collection</p>
                 </div>
-                <button onClick={onClear} className="rounded-lg px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-200 bg-slate-100 border border-slate-200">Clear All</button>
+                <button onClick={onClear} className="rounded-lg px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-200 bg-slate-100 border border-slate-200">Deselect All</button>
             </div>
 
             {/* Asset Cards */}
@@ -414,6 +414,7 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
 
     const handleLocateAsset = (asset: MapAsset) => {
         if (!mapInstanceRef.current) return;
+        setModalAsset(null);
 
         const pin = assetPinMap.get(asset.id);
         if (pin) {
