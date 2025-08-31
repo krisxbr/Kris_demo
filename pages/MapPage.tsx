@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { MOCK_MAP_ASSETS, MOCK_USER_ID, FALLBACK_SVG } from '../constants';
 import { MapAsset, Page } from '../types';
-import { ShareIcon, FullScreenIcon, CloseIcon, SearchIcon, FilterIcon, CheckIcon, RomanHelmetIcon, CrosshairIcon } from '../components/icons';
+import { ShareIcon, FullScreenIcon, CloseIcon, SearchIcon, FilterIcon, CheckIcon, RomanHelmetIcon, CrosshairIcon, ExitFullScreenIcon, ZoomOutIcon } from '../components/icons';
 import { classNames } from '../utils/classNames';
 import { SafeImage } from '../components/shared/SafeImage';
 import { Pill } from '../components/ui/Pill';
@@ -58,52 +58,69 @@ const PIN_LOCATIONS = [
     { assetId: "ma33", lat: 48.8584, lng: 2.2945 },
 ];
 
+const isRomanEmpireAsset = (asset: MapAsset) => 
+    asset.tags.some(tag => tag.toLowerCase().includes('rome'));
+
 const AssetPreviewCard: React.FC<{
     asset: MapAsset;
     onClose: () => void;
     onNavigate: (page: Page) => void;
     onFullscreen: () => void;
-}> = ({ asset, onClose, onNavigate, onFullscreen }) => (
-    <div className="relative w-[840px] max-w-[90vw] max-h-[90vh] rounded-2xl bg-white shadow-2xl overflow-hidden grid md:grid-cols-3 animate-fade-in" onClick={e => e.stopPropagation()}>
-        <div className="relative h-64 md:h-full md:col-span-2">
-            <SafeImage src={asset.thumb} alt={asset.title} className="h-full w-full object-cover" />
-        </div>
-        <div className="relative flex flex-col p-4 overflow-y-auto">
-            <button onClick={onClose} className="absolute top-2 right-2 h-8 w-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center hover:bg-slate-200 z-10">
-                <CloseIcon className="h-4 w-4" />
-            </button>
-            <div className="flex-grow">
-                <h3 className="font-semibold text-slate-900 text-lg mb-1 pr-8">{asset.title}</h3>
-                <p className="text-xs text-slate-600 mb-2">by {asset.author}</p>
-                <div className="flex flex-wrap gap-1.5 mb-3">
-                    {asset.tags.map((tag) => <Pill key={tag}>{tag}</Pill>)}
-                </div>
-                <p className="text-sm text-slate-700 mb-3">{asset.description}</p>
+}> = ({ asset, onClose, onNavigate, onFullscreen }) => {
+    const isRoman = isRomanEmpireAsset(asset);
+    return (
+        <div className="relative w-[840px] max-w-[90vw] max-h-[90vh] rounded-2xl bg-white shadow-2xl overflow-hidden grid md:grid-cols-3 animate-fade-in" onClick={e => e.stopPropagation()}>
+            <div className="relative h-64 md:h-full md:col-span-2">
+                <SafeImage src={asset.thumb} alt={asset.title} className="h-full w-full object-cover" />
             </div>
-            <div className="space-y-3 mt-auto pt-3">
-                <p className="text-xs text-slate-500 font-medium p-2 rounded-md bg-slate-100">
-                    {asset.visibility === 'Private'
-                        ? "This is a private asset. Only you can use it in lessons."
-                        : "This is a public asset, free for educational use."}
-                </p>
-                <div className="grid grid-cols-2 gap-2">
-                    <button className="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200">
-                        <ShareIcon className="h-4 w-4" /> Share
-                    </button>
-                    <button onClick={onFullscreen} className="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200">
-                        <FullScreenIcon className="h-4 w-4" /> Fullscreen
-                    </button>
-                </div>
-                <button
-                    onClick={() => onNavigate('Create')}
-                    className="w-full rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500"
-                >
-                    Use in a Lesson
+            <div className="relative flex flex-col p-4 overflow-y-auto">
+                <button onClick={onClose} className="absolute top-2 right-2 h-8 w-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center hover:bg-slate-200 z-10">
+                    <CloseIcon className="h-4 w-4" />
                 </button>
+                
+                <div className="flex-grow">
+                    <h3 className="font-semibold text-slate-900 text-lg mb-1 pr-8">{asset.title}</h3>
+                    
+                    {isRoman && (
+                        <div className="flex items-center gap-2 rounded-lg bg-amber-100 p-2 text-sm text-amber-900 border border-amber-200 my-3">
+                            <RomanHelmetIcon className="h-5 w-5 flex-shrink-0" />
+                            <div className="text-xs">
+                                <span className="font-semibold">Thematic Collection:</span> This asset is part of the Roman Empire collection.
+                            </div>
+                        </div>
+                    )}
+
+                    <p className="text-xs text-slate-600 mb-2">by {asset.author}</p>
+                    <div className="flex flex-wrap gap-1.5 mb-3">
+                        {asset.tags.map((tag) => <Pill key={tag}>{tag}</Pill>)}
+                    </div>
+                    <p className="text-sm text-slate-700 mb-3">{asset.description}</p>
+                </div>
+                <div className="space-y-3 mt-auto pt-3">
+                    <p className="text-xs text-slate-500 font-medium p-2 rounded-md bg-slate-100">
+                        {asset.visibility === 'Private'
+                            ? "This is a private asset. Only you can use it in lessons."
+                            : "This is a public asset, free for educational use."}
+                    </p>
+                    <div className="grid grid-cols-2 gap-2">
+                        <button className="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200">
+                            <ShareIcon className="h-4 w-4" /> Share
+                        </button>
+                        <button onClick={onFullscreen} className="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200">
+                            <FullScreenIcon className="h-4 w-4" /> Fullscreen
+                        </button>
+                    </div>
+                    <button
+                        onClick={() => onNavigate('Create')}
+                        className="w-full rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500"
+                    >
+                        Use in a Lesson
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
-);
+    );
+};
 
 interface SelectionTrayProps {
     selectedAssets: MapAsset[];
@@ -168,9 +185,11 @@ const SelectionTray: React.FC<SelectionTrayProps> = ({ selectedAssets, onDeselec
 
 interface MapPageProps {
     onNavigate: (page: Page) => void;
+    isFullscreen: boolean;
+    onToggleFullscreen: () => void;
 }
 
-export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
+export const MapPage: React.FC<MapPageProps> = ({ onNavigate, isFullscreen, onToggleFullscreen }) => {
     const [filter, setFilter] = useState<'Combined' | 'Global' | 'Personal'>('Combined');
     const [selectedAssetIds, setSelectedAssetIds] = useState<string[]>([]);
     const [modalAsset, setModalAsset] = useState<MapAsset | null>(null);
@@ -284,6 +303,17 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
             if (mapInstanceRef.current.getZoom() < 15) {
                 mapInstanceRef.current.setZoom(15);
             }
+        }
+    };
+
+    const handleZoomOut = () => {
+        if (mapInstanceRef.current) {
+            mapInstanceRef.current.fitBounds({
+                north: 55.7,
+                south: 34.5,
+                west: -10.5,
+                east: 31.4,
+            }, 50); // 50px padding
         }
     };
 
@@ -445,11 +475,16 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
 
 
     return (
-        <div className="flex flex-col h-[calc(100vh-140px)] min-h-[600px] w-full rounded-2xl overflow-hidden shadow-lg border border-slate-200 bg-slate-100">
+        <div className={classNames(
+            "flex flex-col w-full overflow-hidden bg-slate-100",
+            isFullscreen 
+                ? "h-screen rounded-none border-none shadow-none" 
+                : "h-[calc(100vh-140px)] min-h-[600px] rounded-2xl shadow-lg border border-slate-200"
+        )}>
             <div className="relative flex-grow">
                 <div ref={mapRef} className="h-full w-full" />
                 
-                <div ref={searchContainerRef} className="absolute top-4 left-4 z-10 w-[450px] max-w-[calc(100%-2rem)]">
+                <div ref={searchContainerRef} className="absolute top-4 left-4 z-10 w-[450px] max-w-[calc(100%-5.5rem)]">
                     <div className={classNames("relative rounded-2xl bg-white shadow-lg border border-slate-200 transition-all duration-300", isSearchFocused && "ring-2 ring-blue-500")}>
                         <div className="flex items-center gap-2 p-2">
                             <SearchIcon className="h-5 w-5 text-slate-400 ml-2" />
@@ -486,6 +521,23 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
                         )}
                     </div>
                 </div>
+
+                <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
+                    <button 
+                        onClick={onToggleFullscreen}
+                        className="h-12 w-12 rounded-2xl bg-white shadow-lg border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-100 hover:text-slate-800 transition transform hover:scale-110 active:scale-100 active:duration-75"
+                        aria-label={isFullscreen ? 'Exit fullscreen map' : 'Enter fullscreen map'}
+                    >
+                        {isFullscreen ? <ExitFullScreenIcon /> : <FullScreenIcon />}
+                    </button>
+                    <button
+                        onClick={handleZoomOut}
+                        className="h-12 w-12 rounded-2xl bg-white shadow-lg border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-100 hover:text-slate-800 transition transform hover:scale-110 active:scale-95 active:duration-75"
+                        aria-label="Zoom out map to overview"
+                    >
+                        <ZoomOutIcon />
+                    </button>
+                </div>
             </div>
 
             {selectedAssets.length > 0 && (
@@ -520,6 +572,7 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
                             <div className="overflow-y-auto p-2">
                                 {stackedModalAssets.map(asset => {
                                     const isSelected = selectedAssetIds.includes(asset.id);
+                                    const isRoman = isRomanEmpireAsset(asset);
                                     return (
                                         <div 
                                             key={asset.id}
@@ -536,7 +589,10 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
                                             </div>
                                             <SafeImage src={asset.thumb} alt={asset.title} className="h-12 w-12 rounded-md object-cover flex-shrink-0" />
                                             <div className="flex-grow">
-                                                <p className="text-sm font-medium text-gray-800 line-clamp-1">{asset.title}</p>
+                                                <div className="flex items-center gap-1.5">
+                                                    {isRoman && <RomanHelmetIcon className="h-4 w-4 text-amber-700 flex-shrink-0" />}
+                                                    <p className="text-sm font-medium text-gray-800 line-clamp-1">{asset.title}</p>
+                                                </div>
                                                 <p className="text-xs text-gray-500 line-clamp-1">by {asset.author}</p>
                                             </div>
                                             <button
