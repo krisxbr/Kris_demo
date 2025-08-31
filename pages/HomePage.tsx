@@ -11,7 +11,7 @@ import { Lesson, Page } from '../types';
 import { BookIcon, CreateIcon, MapIcon } from '../components/icons';
 
 interface HomePageProps {
-    onNavigate: (page: Page, params?: { tag: string }) => void;
+    onNavigate: (page: Page, params?: { tag?: string }) => void;
     onOpenLesson: (lesson: Lesson) => void;
 }
 

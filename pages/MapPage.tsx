@@ -5,6 +5,7 @@ import { ShareIcon, CloseIcon, SearchIcon, FilterIcon, CheckIcon, RomanHelmetIco
 import { classNames } from '../utils/classNames';
 import { SafeImage } from '../components/shared/SafeImage';
 import { Pill } from '../components/ui/Pill';
+import { CreateLessonModal } from '../components/create/CreateLessonModal';
 
 // Fix: Add declaration for the Google Maps API on the window object.
 declare global {
@@ -317,7 +318,7 @@ const StackedAssetsTray: React.FC<{
 };
 
 interface MapPageProps {
-    onNavigate: (page: Page, params?: { tag: string }) => void;
+    onNavigate: (page: Page, params?: { tag?: string }) => void;
 }
 
 export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
@@ -331,6 +332,7 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [isSearchFocused, setIsSearchFocused] = useState(false);
     const [isMapReady, setIsMapReady] = useState(false);
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
     const searchContainerRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<HTMLDivElement>(null);
@@ -411,6 +413,13 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
             }
         });
     };
+    
+    const handleOpenCreateModal = () => {
+        setModalAsset(null);
+        setStackedModalAssets(null);
+        setIsPreviewFullscreen(false);
+        setIsCreateModalOpen(true);
+    };
 
     const handleLocateAsset = (asset: MapAsset) => {
         if (!mapInstanceRef.current) return;
@@ -445,9 +454,16 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
         if (e.target !== e.currentTarget) return;
         if (modalAsset) {
             handleCloseAssetPreview();
-        } else {
+        } else if (stackedModalAssets) {
             setStackedModalAssets(null);
+        } else if (isCreateModalOpen) {
+            setIsCreateModalOpen(false);
         }
+    };
+
+    const handlePreviewAsset = (asset: MapAsset) => {
+        setStackedModalAssets(null);
+        setModalAsset(asset);
     };
 
 
@@ -663,11 +679,11 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
                     </button>
                 </div>
                 
-                {(modalAsset || stackedModalAssets) && (
+                {(modalAsset || stackedModalAssets || isCreateModalOpen) && (
                     <div 
                         className={classNames(
-                            "absolute inset-0 bg-black/60 z-30 flex",
-                            modalAsset ? "items-center justify-center" : "items-end",
+                            "absolute inset-0 bg-black/60 z-30 flex justify-center",
+                            stackedModalAssets ? "items-end" : "items-center",
                             isPreviewFullscreen ? "p-0" : ""
                         )}
                         onClick={handleOverlayClick}
@@ -682,15 +698,13 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
                             onToggleSelect={handleToggleSelectionInModal}
                         />}
                         
-                        {!modalAsset && stackedModalAssets && (
+                        {stackedModalAssets && (
                             <StackedAssetsTray
                                 assets={stackedModalAssets}
                                 selectedAssetIds={selectedAssetIds}
                                 onClose={() => setStackedModalAssets(null)}
                                 onToggleSelect={handleToggleSelectionInModal}
-                                onPreview={(asset) => {
-                                    setModalAsset(asset);
-                                }}
+                                onPreview={handlePreviewAsset}
                                 onSelectAll={() => {
                                     const assetIds = stackedModalAssets.map(a => a.id);
                                     setSelectedAssetIds(prev => [...new Set([...prev, ...assetIds])]);
@@ -701,6 +715,17 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
                                 }}
                             />
                         )}
+                        
+                        <CreateLessonModal
+                          isOpen={isCreateModalOpen}
+                          onClose={() => setIsCreateModalOpen(false)}
+                          onCreate={(details) => {
+                              console.log("Creating lesson with details:", details);
+                              setIsCreateModalOpen(false);
+                              onNavigate("Create");
+                          }}
+                          initialAssetCount={selectedAssets.length}
+                      />
                     </div>
                 )}
             </div>
@@ -710,8 +735,8 @@ export const MapPage: React.FC<MapPageProps> = ({ onNavigate }) => {
                     selectedAssets={selectedAssets}
                     onDeselect={(id) => setSelectedAssetIds(prev => prev.filter(assetId => assetId !== id))}
                     onClear={() => setSelectedAssetIds([])}
-                    onPreview={setModalAsset}
-                    onUse={() => onNavigate('Create')}
+                    onPreview={handlePreviewAsset}
+                    onUse={handleOpenCreateModal}
                     onLocate={handleLocateAsset}
                 />
             )}

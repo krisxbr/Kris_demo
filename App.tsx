@@ -39,8 +39,9 @@ export default function App() {
     setPage("Lessons");
   };
   
-  const handleNavigate = (newPage: Page, params?: { tag: string }) => {
+  const handleNavigate = (newPage: Page, params?: { tag?: string }) => {
     setSelectedLesson(null);
+
     if (newPage === 'Lessons' && params?.tag) {
         setLessonsPageInitialQuery(params.tag);
     } else {
@@ -65,22 +66,18 @@ export default function App() {
   const isPlayerPage = !!selectedLesson;
   const useFullScreenLayout = isMapPage || isPlayerPage;
 
-  if (useFullScreenLayout) {
-    return (
-      <div className="h-screen w-screen bg-slate-50 text-slate-800 flex flex-col p-4 md:p-6 gap-6">
-        <Header activePage={isPlayerPage ? "Lessons" : page} onNavigate={handleNavigate} />
-        <main className="flex-grow min-h-0">
-          {isPlayerPage ? (
-            <Player lesson={selectedLesson!} onBack={handleBackFromPlayer} />
-          ) : (
-            <MapPage onNavigate={handleNavigate} />
-          )}
-        </main>
-      </div>
-    )
-  }
-
-  return (
+  const mainContent = useFullScreenLayout ? (
+    <div className="h-screen w-screen bg-slate-50 text-slate-800 flex flex-col p-4 md:p-6 gap-6">
+      <Header activePage={isPlayerPage ? "Lessons" : page} onNavigate={handleNavigate} />
+      <main className="flex-grow min-h-0">
+        {isPlayerPage ? (
+          <Player lesson={selectedLesson!} onBack={handleBackFromPlayer} />
+        ) : (
+          <MapPage onNavigate={handleNavigate} />
+        )}
+      </main>
+    </div>
+  ) : (
     <div className="min-h-screen bg-slate-50 text-slate-800">
       <div className='mx-auto max-w-6xl p-4 md:p-6'>
         <Header activePage={page} onNavigate={handleNavigate} />
@@ -90,5 +87,11 @@ export default function App() {
         <Footer />
       </div>
     </div>
+  );
+  
+  return (
+    <>
+      {mainContent}
+    </>
   );
 }

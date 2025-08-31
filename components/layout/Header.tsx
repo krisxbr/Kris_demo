@@ -5,7 +5,7 @@ import { BookIcon, CreateIcon, GlobeIcon, MapIcon, UserIcon } from '../icons';
 
 interface HeaderProps {
     activePage: Page;
-    onNavigate: (page: Page) => void;
+    onNavigate: (page: Page, params?: { tag?: string }) => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({ activePage, onNavigate }) => {
