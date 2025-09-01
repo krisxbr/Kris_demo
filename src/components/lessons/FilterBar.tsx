@@ -42,58 +42,14 @@
 }
 .animate-slide-in-up {
   animation: slide-in-up 0.6s ease-out forwards;
-}
-
-/* Accessibility improvements */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-/* Focus improvements */
-*:focus-visible {
-  outline: 2px solid #3b82f6;
-  outline-offset: 2px;
-}
-
-/* Reduced motion support */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-/* High contrast mode support */
-@media (prefers-contrast: high) {
-  .border-slate-200 {
-    border-color: #000;
-  }
-  .text-slate-600 {
-    color: #000;
-  }
-}
-
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: dark;
-  }
-}
-</style>
-</head>
-  <body class="bg-gray-50">
-    <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
-  </body>
-</html>
+  return (
+    <div className="rounded-2xl border border-gray-200 bg-white p-3 shadow-sm">
+      <SearchAutocomplete
+        value={query}
+        onChange={setQuery}
+        placeholder="Search lessons, tags, authors..."
+        suggestions={suggestions}
+        className="w-full"
+      />
+    </div>
+  );
